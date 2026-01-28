@@ -1,0 +1,78 @@
+[
+  {
+    "ts": "2026-01-28T19:58:38",
+    "filename": "Без имени.jpeg",
+    "labels": "knife, pistol, gun, handgun",
+    "threshold": 0.2,
+    "count": 1,
+    "ms": 6336,
+    "detections": [
+      {
+        "label": "pistol",
+        "score": 0.4988585114479065,
+        "box": [
+          12.302592277526855,
+          34.50553894042969,
+          239.55203247070312,
+          187.12936401367188
+        ],
+        "prompt": "handgun"
+      }
+    ],
+    "result_image": "/static/results/15a6cc8d0b494910aff72a3fb63de74a.jpg"
+  },
+  {
+    "ts": "2026-01-28T20:01:53",
+    "filename": "Без имени2.jpeg",
+    "labels": "knife, pistol, gun, handgun",
+    "threshold": 0.2,
+    "count": 0,
+    "ms": 5491,
+    "detections": [],
+    "result_image": "/static/results/1a0902f0a8d94baa8a788807a3b44b21.jpg"
+  },
+  {
+    "ts": "2026-01-28T20:02:23",
+    "filename": "Без имени2.jpeg",
+    "labels": "knife, pistol, gun, handgun, revolver, kitchen knife, chef knife",
+    "threshold": 0.15,
+    "count": 1,
+    "ms": 5670,
+    "detections": [
+      {
+        "label": "combat knife",
+        "score": 0.18638265132904053,
+        "box": [
+          13.318072319030762,
+          10.51104736328125,
+          180.21449279785156,
+          244.30914306640625
+        ],
+        "prompt": "combat knife"
+      }
+    ],
+    "result_image": "/static/results/dc9fc94d9a454e3cb347aea32bad2d0e.jpg"
+  },
+  {
+    "ts": "2026-01-28T20:26:13",
+    "filename": "Без имени2.jpeg",
+    "labels": "knife, pistol, gun, handgun, revolver, kitchen knife, chef knife",
+    "threshold": 0.15,
+    "count": 1,
+    "ms": 6067,
+    "detections": [
+      {
+        "label": "combat knife",
+        "score": 0.18638265132904053,
+        "box": [
+          13.318072319030762,
+          10.51104736328125,
+          180.21449279785156,
+          244.30914306640625
+        ],
+        "prompt": "combat knife"
+      }
+    ],
+    "result_image": "/static/results/393653f546694f3794a77e9c759913a7.jpg"
+  }
+]

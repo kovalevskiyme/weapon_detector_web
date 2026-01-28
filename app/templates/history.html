@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>History — Weapon Detector</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#121a33;
+      --card: rgba(255,255,255,.08);
+      --card2: rgba(255,255,255,.06);
+      --border: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --accent1:#7c3aed;
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+      --danger:#ef4444;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,.35), transparent 55%),
+        radial-gradient(1000px 600px at 90% 20%, rgba(34,197,94,.28), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      overflow-x:hidden;
+    }
+    .wrap{
+      max-width: 1200px;
+      margin: 28px auto;
+      padding: 0 18px 60px;
+    }
+    .card{
+      background: linear-gradient(180deg, var(--card), var(--card2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      backdrop-filter: blur(10px);
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    h1{
+      margin:0;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      font-size: clamp(22px, 2.6vw, 34px);
+    }
+    .subtitle{
+      margin-top:8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .actions{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    a{ text-decoration:none; color: var(--text); }
+
+    .btn{
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 800;
+      cursor:pointer;
+      color: white;
+      background: linear-gradient(90deg, var(--accent1), #4f46e5);
+      box-shadow: 0 14px 30px rgba(124,58,237,.25);
+      transition: transform .12s ease, filter .12s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      min-height: 44px;
+      border: none;
+    }
+    .btn:hover{ transform: translateY(-1px); filter: brightness(1.05); }
+
+    .btn-secondary{
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.18);
+      color: var(--text);
+      box-shadow: none;
+      font-weight: 700;
+    }
+
+
+    .btn-danger{
+      background: rgba(239,68,68,.16);
+      border: 1px solid rgba(239,68,68,.35);
+      color: rgba(255,255,255,.92);
+      box-shadow: 0 14px 30px rgba(239,68,68,.12);
+      font-weight: 800;
+    }
+    .btn-danger:hover{
+      filter: brightness(1.08);
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      margin-top: 14px;
+    }
+    th, td{
+      padding: 10px 12px;
+      text-align:left;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      font-size: 13px;
+      vertical-align: top;
+    }
+    th{
+      color: rgba(255,255,255,.85);
+      background: rgba(255,255,255,.06);
+      font-weight: 800;
+    }
+    tr:last-child td{ border-bottom:none; }
+    code{ font-size: 12px; color: rgba(255,255,255,.88); }
+    .small{ color: var(--muted); font-size: 12px; }
+    img{
+      max-width: 140px;
+      border:1px solid rgba(255,255,255,.18);
+      border-radius: 12px;
+      display:block;
+      background: rgba(0,0,0,.15);
+    }
+    .empty{
+      margin-top: 14px;
+      color: rgba(255,255,255,.8);
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.14);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div>
+          <h1>История запросов</h1>
+          <div class="subtitle">Сохраняется в <code>data/history.json</code>. Экспортируй в Excel/PDF или очисти историю.</div>
+        </div>
+
+        <div class="actions">
+          <a class="btn" href="/export/excel">⬇ Excel</a>
+          <a class="btn" href="/export/pdf">⬇ PDF</a>
+
+
+          <form action="/history/clear" method="post" style="margin:0;"
+                onsubmit="return confirm('Точно очистить историю? Это удалит записи из history.json.');">
+            <button class="btn btn-danger" type="submit">🗑 Очистить историю</button>
+          </form>
+
+          <a class="btn btn-secondary" href="/">← На главную</a>
+        </div>
+      </header>
+
+      {% if items and items|length > 0 %}
+      <table>
+        <thead>
+          <tr>
+            <th>Время</th>
+            <th>Файл</th>
+            <th>Labels / Threshold</th>
+            <th>Детекций</th>
+            <th>Время (мс)</th>
+            <th>Результат</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for it in items %}
+            <tr>
+              <td><code>{{ it.ts }}</code></td>
+              <td><code>{{ it.filename }}</code></td>
+              <td>
+                <div><code>{{ it.labels }}</code></div>
+                <div class="small">thr={{ it.threshold }}</div>
+              </td>
+              <td>
+                <div style="font-weight:800;">{{ it.count }}</div>
+                {% if it.detections %}
+                  <div class="small" style="margin-top:6px;">
+                    {% for d in it.detections[:5] %}
+                      {{ d.label }} ({{ "%.2f"|format(d.score) }})<br/>
+                    {% endfor %}
+                    {% if it.detections|length > 5 %}…{% endif %}
+                  </div>
+                {% endif %}
+              </td>
+              <td><code>{{ it.ms }}</code></td>
+              <td>
+                {% if it.result_image %}
+                  <a href="{{ it.result_image }}" target="_blank">
+                    <img src="{{ it.result_image }}" alt="result"/>
+                  </a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <div class="empty">История пустая. Вернись на главную и сделай детекцию.</div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weapon Detector — Photo MVP</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#121a33;
+      --card: rgba(255,255,255,.08);
+      --card2: rgba(255,255,255,.06);
+      --border: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --accent1:#7c3aed;
+      --accent2:#22c55e;
+      --danger:#ef4444;
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,.35), transparent 55%),
+        radial-gradient(1000px 600px at 90% 20%, rgba(34,197,94,.28), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      overflow-x:hidden;
+    }
+
+    .wrap{
+      max-width: 1100px;
+      margin: 28px auto;
+      padding: 0 18px 60px;
+    }
+
+    .glow{
+      position: fixed;
+      inset: -200px;
+      background: radial-gradient(circle at 30% 30%, rgba(124,58,237,.18), transparent 40%),
+                  radial-gradient(circle at 70% 50%, rgba(34,197,94,.14), transparent 45%);
+      filter: blur(30px);
+      animation: drift 12s ease-in-out infinite alternate;
+      pointer-events: none;
+      z-index: -1;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(-20px,-10px,0) scale(1); }
+      to{ transform: translate3d(20px,10px,0) scale(1.03); }
+    }
+
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom: 18px;
+    }
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    h1{
+      margin:0;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      font-size: clamp(26px, 3.2vw, 40px);
+      line-height: 1.05;
+    }
+    .subtitle{
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+      max-width: 720px;
+    }
+
+    .chipbar{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration:none;
+      box-shadow: 0 8px 20px rgba(0,0,0,.25);
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .chip:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.09);
+      border-color: rgba(255,255,255,.22);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 16px;
+      margin-top: 14px;
+    }
+    @media (max-width: 920px){
+      .grid{ grid-template-columns: 1fr; }
+      .chipbar{ justify-content:flex-start; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, var(--card), var(--card2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      backdrop-filter: blur(10px);
+    }
+
+    .card h2{
+      margin:0 0 10px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .formrow{
+      display:grid;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    label{
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--muted);
+      display:block;
+      margin-bottom: 6px;
+    }
+
+    input[type="file"],
+    input[type="text"],
+    input[type="number"]{
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s ease, transform .15s ease;
+    }
+    input[type="file"]{ padding: 10px; }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="file"]:focus{
+      border-color: rgba(124,58,237,.55);
+    }
+
+    .hint{
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .actions{
+      display:flex;
+      gap: 12px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-top: 6px;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      cursor:pointer;
+      color: white;
+      background: linear-gradient(90deg, var(--accent1), #4f46e5);
+      box-shadow: 0 14px 30px rgba(124,58,237,.25);
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      min-height: 48px;
+    }
+    .btn:hover{ transform: translateY(-1px); filter: brightness(1.05); }
+    .btn:active{ transform: translateY(0px) scale(.99); }
+
+    .btn-secondary{
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.18);
+      color: var(--text);
+      box-shadow: none;
+      font-weight: 700;
+    }
+
+    .pulse{
+      width:10px; height:10px; border-radius:999px;
+      background: var(--accent2);
+      box-shadow: 0 0 0 rgba(34,197,94,.5);
+      animation: pulse 1.6s infinite;
+    }
+    @keyframes pulse{
+      0%{ box-shadow: 0 0 0 0 rgba(34,197,94,.45); }
+      70%{ box-shadow: 0 0 0 12px rgba(34,197,94,0); }
+      100%{ box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+    }
+
+    .resultTitle{
+      margin: 18px 0 10px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .resultGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 10px;
+    }
+    @media (max-width: 920px){
+      .resultGrid{ grid-template-columns:1fr; }
+    }
+
+    .imgbox{
+      border-radius: var(--radius);
+      overflow:hidden;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height: 320px;
+    }
+    .imgbox img{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+    }
+    th, td{
+      padding: 10px 12px;
+      text-align:left;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      font-size: 13px;
+    }
+    th{
+      color: rgba(255,255,255,.85);
+      background: rgba(255,255,255,.06);
+      font-weight: 800;
+    }
+    td{ color: rgba(255,255,255,.86); }
+    tr:last-child td{ border-bottom:none; }
+
+    .empty{
+      color: rgba(255,255,255,.75);
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(239,68,68,.10);
+      border: 1px solid rgba(239,68,68,.22);
+    }
+
+    .badgeRow{ display:flex; gap:10px; flex-wrap:wrap; margin: 10px 0 6px; }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.14);
+      font-size: 12px;
+      color: rgba(255,255,255,.85);
+      font-weight: 700;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      padding: 2px 7px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.20);
+      color: rgba(255,255,255,.92);
+    }
+
+
+    .flash {
+      animation: flash 1.0s ease;
+    }
+    @keyframes flash {
+      0% { box-shadow: 0 0 0 0 rgba(124,58,237,.0); }
+      40% { box-shadow: 0 0 0 6px rgba(124,58,237,.22); }
+      100% { box-shadow: 0 0 0 0 rgba(124,58,237,.0); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="glow"></div>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Детекция опасных предметов</h1>
+        <div class="subtitle">
+          Загрузка фото → детекция (OWL-ViT zero-shot) → визуализация результата.
+          Модель ищет объекты по текстовым запросам в <b>Labels</b>.
+        </div>
+      </div>
+
+      <div class="chipbar">
+        <a class="chip" href="/history">История</a>
+        <span class="chip"><span class="pulse"></span> Server: online</span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Загрузить изображение</h2>
+
+        <form action="/detect" method="post" enctype="multipart/form-data">
+          <div class="formrow">
+            <div>
+              <label>Изображение</label>
+              <input type="file" name="file" accept="image/*" required />
+              <div class="hint">JPG/PNG. Чем выше качество, тем лучше детекция.</div>
+            </div>
+
+            <div>
+              <label>Labels (через запятую)</label>
+              <input type="text" name="labels" value="{{ labels }}" />
+              <div class="hint">Пример: <span class="kbd">knife, pistol</span> или <span class="kbd">revolver, pistol</span></div>
+            </div>
+
+            <div>
+              <label>Threshold</label>
+              <input type="number" name="threshold" step="0.05" min="0" max="1" value="{{ threshold }}" />
+              <div class="hint">Если не находит — попробуй 0.10–0.20</div>
+            </div>
+
+            <div class="actions">
+              <button class="btn" type="submit">▶ Обработать</button>
+              <a class="btn btn-secondary" href="/history">Открыть историю</a>
+
+              {% if result_image %}
+
+                <button class="btn btn-secondary" type="button" id="goResultBtn">
+                  ↓ Перейти к результату
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Инструкция</h2>
+
+        <div class="badgeRow">
+          <span class="badge">1) Введи запросы</span>
+          <span class="badge">2) Выбери порог</span>
+          <span class="badge">3) Жми “Обработать”</span>
+        </div>
+
+        <div class="subtitle" style="margin-top:10px;">
+          <b>Labels</b> — это список текстовых “подсказок” для модели.
+          OWL-ViT работает в режиме <b>zero-shot</b>: она не использует фиксированные классы,
+          а пытается найти на изображении то, что ты описал словами.
+        </div>
+
+        <div class="subtitle" style="margin-top:12px;">
+          <b>Как вводить Labels (принцип):</b>
+          <ul style="margin:8px 0 0; padding-left: 18px; color: rgba(255,255,255,.86);">
+            <li>Пиши <b>на английском</b> и через запятую: <span class="kbd">knife, pistol</span></li>
+            <li>Сначала — <b>самое желаемое</b> слово (то, что хочешь видеть в ответе)</li>
+            <li>Добавляй 2–4 синонима (иногда помогает “точнее” сформулировать)</li>
+          </ul>
+        </div>
+
+        <div class="subtitle" style="margin-top:12px;">
+          <b>Примеры:</b>
+          <ul style="margin:8px 0 0; padding-left: 18px; color: rgba(255,255,255,.86);">
+            <li>Нож: <span class="kbd">knife, kitchen knife, blade</span></li>
+            <li>Пистолет: <span class="kbd">pistol, semi-automatic pistol, gun</span></li>
+            <li>Револьвер: <span class="kbd">revolver, pistol, gun</span></li>
+          </ul>
+        </div>
+
+        <div class="subtitle" style="margin-top:12px;">
+          <b>Как это работает внутри:</b>
+          мы автоматически расширяем “простые” слова синонимами (<i>ensemble labels</i>),
+          а потом показываем в результате “человеческий” label (например <span class="kbd">pistol</span> вместо <span class="kbd">handgun</span>),
+          если ты явно указал его в списке.
+        </div>
+
+        <div class="subtitle" style="margin-top:12px;">
+          <b>Threshold (порог):</b>
+          <ul style="margin:8px 0 0; padding-left: 18px; color: rgba(255,255,255,.86);">
+            <li>Ниже порог → больше срабатываний (и больше ложных)</li>
+            <li>Выше порог → меньше ложных, но может “не найти” объект</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    {% if result_image %}
+
+      <div id="resultSection" class="resultTitle">Результат</div>
+
+      <div class="resultGrid">
+        <div class="card" id="resultCardLeft">
+          <h2>Изображение с разметкой</h2>
+          <div class="imgbox">
+            <img src="{{ result_image }}" alt="result" />
+          </div>
+        </div>
+
+        <div class="card" id="resultCardRight">
+          <h2>Детекции</h2>
+          {% if detections and detections|length > 0 %}
+            <table>
+              <thead>
+                <tr><th>Label</th><th>Score</th><th>Box</th></tr>
+              </thead>
+              <tbody>
+                {% for d in detections %}
+                  <tr>
+                    <td><b>{{ d.label }}</b></td>
+                    <td>{{ "%.2f"|format(d.score) }}</td>
+                    <td>[{{ "%.0f"|format(d.box[0]) }}, {{ "%.0f"|format(d.box[1]) }}, {{ "%.0f"|format(d.box[2]) }}, {{ "%.0f"|format(d.box[3]) }}]</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <div class="empty">Ничего не найдено на заданном пороге.</div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+
+  <script>
+    (function () {
+      const btn = document.getElementById("goResultBtn");
+      const section = document.getElementById("resultSection");
+
+      if (!btn || !section) return;
+
+      btn.addEventListener("click", () => {
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+
+
+        const left = document.getElementById("resultCardLeft");
+        const right = document.getElementById("resultCardRight");
+        if (left) { left.classList.remove("flash"); void left.offsetWidth; left.classList.add("flash"); }
+        if (right) { right.classList.remove("flash"); void right.offsetWidth; right.classList.add("flash"); }
+      });
+    })();
+  </script>
+</body>
+</html>
